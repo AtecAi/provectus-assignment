@@ -4,60 +4,95 @@ import streamlit as st
 from src.analytics.queries import query
 
 
+def _reset_filter_state(defaults):
+    """Restore all filter widgets to their default values."""
+    for key, value in defaults.items():
+        st.session_state[key] = value
+
+
+def _render_multiselect_filter(label, options, all_label, all_key, select_key):
+    """Render a stable checkbox + multiselect pair.
+
+    Keeping the multiselect mounted avoids Streamlit state glitches when a user
+    clears all selections and then wants to add options back.
+    """
+    if all_key not in st.session_state:
+        st.session_state[all_key] = True
+
+    current = st.session_state.get(select_key, options)
+    st.session_state[select_key] = [value for value in current if value in options]
+
+    all_selected = st.sidebar.checkbox(all_label, key=all_key)
+    if all_selected:
+        st.session_state[select_key] = options
+
+    st.sidebar.multiselect(
+        label,
+        options,
+        key=select_key,
+        disabled=all_selected,
+    )
+
+    return options if all_selected else st.session_state[select_key]
+
+
 def render_filters():
     """Render sidebar filters and return a dict of selected values."""
     st.sidebar.markdown("### Filters")
 
-    # Date range
+    # Load filter option lists first so reset can happen before widgets render.
     dates = query("SELECT MIN(start_time)::DATE AS min_d, MAX(end_time)::DATE AS max_d FROM sessions")
     min_date = dates["min_d"].iloc[0]
     max_date = dates["max_d"].iloc[0]
-    date_range = st.sidebar.date_input("Date range", value=(min_date, max_date), min_value=min_date, max_value=max_date)
-
-    # Practice
     practices = query("SELECT DISTINCT practice FROM employees ORDER BY practice")["practice"].tolist()
-    if st.sidebar.checkbox("All practices", value=True, key="all_practices"):
-        selected_practices = practices
-        if "sel_practices" in st.session_state:
-            st.session_state["sel_practices"] = practices
-    else:
-        selected_practices = st.sidebar.multiselect("Practice", practices, default=practices, key="sel_practices")
-
-    # Level
     levels = query("SELECT DISTINCT level FROM employees ORDER BY level")["level"].tolist()
-    if st.sidebar.checkbox("All levels", value=True, key="all_levels"):
-        selected_levels = levels
-        if "sel_levels" in st.session_state:
-            st.session_state["sel_levels"] = levels
-    else:
-        selected_levels = st.sidebar.multiselect("Level", levels, default=levels, key="sel_levels")
-
-    # Location
     locations = query("SELECT DISTINCT location FROM employees ORDER BY location")["location"].tolist()
-    if st.sidebar.checkbox("All locations", value=True, key="all_locations"):
-        selected_locations = locations
-        if "sel_locations" in st.session_state:
-            st.session_state["sel_locations"] = locations
-    else:
-        selected_locations = st.sidebar.multiselect("Location", locations, default=locations, key="sel_locations")
-
-    # Model
     models = query("SELECT DISTINCT model FROM api_requests WHERE model IS NOT NULL ORDER BY model")["model"].tolist()
-    if st.sidebar.checkbox("All models", value=True, key="all_models"):
-        selected_models = models
-        if "sel_models" in st.session_state:
-            st.session_state["sel_models"] = models
-    else:
-        selected_models = st.sidebar.multiselect("Model", models, default=models, key="sel_models")
-
-    # IDE / Terminal
     terminals = query("SELECT DISTINCT terminal_type FROM api_requests WHERE terminal_type IS NOT NULL ORDER BY terminal_type")["terminal_type"].tolist()
-    if st.sidebar.checkbox("All terminals", value=True, key="all_terminals"):
-        selected_terminals = terminals
-        if "sel_terminals" in st.session_state:
-            st.session_state["sel_terminals"] = terminals
-    else:
-        selected_terminals = st.sidebar.multiselect("IDE / Terminal", terminals, default=terminals, key="sel_terminals")
+
+    defaults = {
+        "date_range": (min_date, max_date),
+        "all_practices": True,
+        "sel_practices": practices,
+        "all_levels": True,
+        "sel_levels": levels,
+        "all_locations": True,
+        "sel_locations": locations,
+        "all_models": True,
+        "sel_models": models,
+        "all_terminals": True,
+        "sel_terminals": terminals,
+    }
+
+    if st.sidebar.button("Reset filters", use_container_width=True):
+        _reset_filter_state(defaults)
+        st.rerun()
+
+    if "date_range" not in st.session_state:
+        st.session_state["date_range"] = (min_date, max_date)
+
+    date_range = st.sidebar.date_input(
+        "Date range",
+        min_value=min_date,
+        max_value=max_date,
+        key="date_range",
+    )
+
+    selected_practices = _render_multiselect_filter(
+        "Practice", practices, "All practices", "all_practices", "sel_practices"
+    )
+    selected_levels = _render_multiselect_filter(
+        "Level", levels, "All levels", "all_levels", "sel_levels"
+    )
+    selected_locations = _render_multiselect_filter(
+        "Location", locations, "All locations", "all_locations", "sel_locations"
+    )
+    selected_models = _render_multiselect_filter(
+        "Model", models, "All models", "all_models", "sel_models"
+    )
+    selected_terminals = _render_multiselect_filter(
+        "IDE / Terminal", terminals, "All terminals", "all_terminals", "sel_terminals"
+    )
 
     return {
         "date_start": date_range[0],
