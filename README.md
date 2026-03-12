@@ -4,6 +4,18 @@ An end-to-end analytics platform that ingests Claude Code telemetry data, stores
 
 **What it answers:** How are 100 engineers using Claude Code? What does it cost? Which tools fail? Who are the power users? Where are the anomalies?
 
+## Deliverables Map
+
+| Assignment Requirement | Location |
+|----------------------|----------|
+| Source code with commit history | This repository |
+| README with setup + architecture + dependencies | This file |
+| Insights presentation (3-5 slides) | [`docs/Analytics_Result.pdf`](docs/Analytics_Result.pdf) |
+| LLM usage log | [LLM Usage section above](#llm-usage) + [`docs/llm-engineering/Claude-Code-Sessions-Log.md`](docs/llm-engineering/Claude-Code-Sessions-Log.md) |
+| Technical specification | [`docs/llm-engineering/SPEC.md`](docs/llm-engineering/SPEC.md) |
+| Security findings | [`docs/known-limitations.md`](docs/known-limitations.md) |
+| Engineering learnings | [`docs/llm-engineering/Compound-Engineering.md`](docs/llm-engineering/Compound-Engineering.md) |
+
 ---
 
 ## Quick Start
@@ -259,15 +271,3 @@ Every significant bug was found by the developer or the external reviewer, not b
 The full session analysis with exact quotes, interaction patterns, and behavioral observations is in [`docs/llm-engineering/Claude-Code-Sessions-Log.md`](docs/llm-engineering/Claude-Code-Sessions-Log.md). Engineering pitfalls and their fixes are documented in [`docs/llm-engineering/Compound-Engineering.md`](docs/llm-engineering/Compound-Engineering.md).
 
 ---
-
-## Deliverables Map
-
-| Assignment Requirement | Location |
-|----------------------|----------|
-| Source code with commit history | This repository |
-| README with setup + architecture + dependencies | This file |
-| Insights presentation (3-5 slides) | [`docs/Analytics_Result.pdf`](docs/Analytics_Result.pdf) |
-| LLM usage log | [LLM Usage section above](#llm-usage) + [`docs/llm-engineering/Claude-Code-Sessions-Log.md`](docs/llm-engineering/Claude-Code-Sessions-Log.md) |
-| Technical specification | [`docs/llm-engineering/SPEC.md`](docs/llm-engineering/SPEC.md) |
-| Security findings | [`docs/known-limitations.md`](docs/known-limitations.md) |
-| Engineering learnings | [`docs/llm-engineering/Compound-Engineering.md`](docs/llm-engineering/Compound-Engineering.md) |
