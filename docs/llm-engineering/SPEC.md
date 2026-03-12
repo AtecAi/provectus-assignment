@@ -167,8 +167,12 @@ sessions (
 
 ### 2.4 Data Validation
 
-- Reject events missing: `timestamp`, `session_id`, `user_email`, or `body` (event type)
-- Cast string-typed numbers (`cost_usd`, `duration_ms`, tokens) to proper types; default to 0 on failure
+- **Reject** events only when core identity/shape is broken: missing `timestamp`, `session_id`, `user_email`, or `body`
+- **Keep** events with malformed optional metric fields — store the bad metric as NULL
+- Numeric casting: malformed → NULL, missing → NULL, valid zero → 0
+- Booleans: `"true"` → True, `"false"` → False, missing/malformed → NULL
+- Track parse failures per field; populate `data_quality` table post-ingestion
+- Distinguish optional fields (e.g. `result_size_bytes`) from required fields (e.g. `cost_usd`) to avoid false quality alarms
 - Log and count rejected/malformed events; print summary at end of ingestion
 - Verify all telemetry emails exist in `employees.csv`; flag orphaned events
 
