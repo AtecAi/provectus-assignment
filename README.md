@@ -26,6 +26,19 @@ make test     # 101 pytest tests
 make clean    # remove output/, venv, duckdb files
 ```
 
+<details>
+<summary><strong>Windows (no make)</strong></summary>
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python -m pip install -r requirements.txt
+.\.venv\Scripts\python generate_fake_data.py --num-users 100 --num-sessions 5000 --days 60 --seed 42
+.\.venv\Scripts\python -m src.ingestion.pipeline
+$env:PYTHONPATH = "."
+.\.venv\Scripts\python -m streamlit run src/dashboard/app.py
+```
+</details>
+
 ---
 
 ## Architecture
